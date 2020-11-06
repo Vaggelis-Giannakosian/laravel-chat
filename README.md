@@ -11,9 +11,9 @@
 
 Chatty is a demo messaging web application built to experiment with Socket.io and Laravel.
 
-## Installation
+## Requirements
 
-TBA
+- Predis Client
 
 ## License
 
