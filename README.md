@@ -11,6 +11,10 @@
 
 Chatty is a demo messaging web application built to experiment with Socket.io and Laravel.
 
+## Installation
+
+TBA
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
