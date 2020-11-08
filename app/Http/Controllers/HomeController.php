@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\MessagePushed;
+use App\Events\MessageSent;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller

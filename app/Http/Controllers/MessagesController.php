@@ -3,7 +3,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\MessagePushed;
+use App\Events\MessageSent;
 use App\Models\User;
 use Carbon\Carbon;
 use Cmgmyr\Messenger\Models\Message;
@@ -82,12 +82,29 @@ class MessagesController extends Controller
      */
     public function store()
     {
+        $receiverId = request()->input('userId');
+        $threadId = request()->input('threadId') ?: ( Thread::between([auth()->id(),$receiverId])->first()->id ?? null );
 
-        $receiver = User::findOrFail(request()->input('userId'));
+        if(! $threadId)
+        {
+            //TODO: create Thread - add message - create participants
+        }else{
+            //TODO: add message
+        }
+
+//        var_dump($threadId);exit;
+
+//
+        $receiver = User::findOrFail($receiverId);
         $message = request()->input('message');
 
-        event(new MessagePushed($receiver,auth()->user(),$message));
+        event(new MessageSent($receiver,auth()->user(),$message));
 
+        exit;
+
+
+        //TODO: find thread and if not exists create one
+//
 //        $input = Request::all();
 //
 //        $thread = Thread::create([

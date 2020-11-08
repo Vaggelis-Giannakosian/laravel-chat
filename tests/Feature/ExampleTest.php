@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Events\MessagePushed;
+use App\Events\MessageSent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
@@ -22,7 +22,7 @@ class ExampleTest extends TestCase
 
         $response = $this->get('/');
 
-        Event::assertDispatched(MessagePushed::class);
+        Event::assertDispatched(MessageSent::class);
 
         $response->assertStatus(200);
     }

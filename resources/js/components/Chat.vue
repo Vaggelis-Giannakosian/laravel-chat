@@ -38,7 +38,7 @@
             // this.listenForBroadcast();
 
             let channel = Echo.private('message.user.' + this.authUser.id)
-            channel.listen('.UserEvent',(data)=>{
+            channel.listen('.NewMessage',(data)=>{
                 this.messages.push(data)
             })
         },
@@ -67,7 +67,7 @@
     }
 </script>
 
-<style>
+<style scoped>
     li{
         list-style: none;
     }
