@@ -1,9 +1,8 @@
 <?php
 
-use App\Events\MessagePushed;
+
 use App\Http\Controllers\MessagesController;
 use Illuminate\Support\Facades\Route;
-use \Illuminate\Support\Facades\Redis;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
