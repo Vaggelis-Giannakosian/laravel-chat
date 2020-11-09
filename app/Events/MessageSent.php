@@ -58,4 +58,8 @@ class MessageSent implements ShouldBroadcast
             'message'=>$this->message
         ];
     }
+
+//    public function tags(){
+//        return ['tags'];
+//    }
 }

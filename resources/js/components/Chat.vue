@@ -24,124 +24,6 @@
         props: ['authUser','receiverId'],
         data() {
             return {
-                styles:{
-                    general: {
-                        color: '#0a0a0a',
-                        backgroundInput: '#fff',
-                        colorPlaceholder: '#9ca6af',
-                        colorCaret: '#1976d2',
-                        colorSpinner: '#333',
-                        borderStyle: '1px solid #e1e4e8',
-                        backgroundScrollIcon: '#fff'
-                    },
-
-                    container: {
-                        border: 'none',
-                        borderRadius: '4px'
-                    },
-
-                    header: {
-                        background: '#fff',
-                        colorRoomName: '#0a0a0a',
-                        colorRoomInfo: '#9ca6af'
-                    },
-
-                    footer: {
-                        background: '#f8f9fa',
-                        borderStyleInput: '1px solid #e1e4e8',
-                        borderInputSelected: '#1976d2',
-                        backgroundReply: 'rgba(0, 0, 0, 0.08)'
-                    },
-
-                    content: {
-                        background: '#f8f9fa'
-                    },
-
-                    sidemenu: {
-                        background: '#fff',
-                        backgroundHover: '#f6f6f6',
-                        backgroundActive: '#e5effa',
-                        colorActive: '#1976d2',
-                        borderColorSearch: '#e1e5e8'
-                    },
-
-                    dropdown: {
-                        background: '#fff',
-                        backgroundHover: '#f6f6f6'
-                    },
-
-                    message: {
-                        background: '#fff',
-                        backgroundMe: '#ccf2cf',
-                        color: '#0a0a0a',
-                        colorStarted: '#9ca6af',
-                        backgroundDeleted: '#dadfe2',
-                        colorDeleted: '#757e85',
-                        colorUsername: '#9ca6af',
-                        colorTimestamp: '#828c94',
-                        backgroundDate: '#e5effa',
-                        colorDate: '#505a62',
-                        backgroundReply: 'rgba(0, 0, 0, 0.08)',
-                        colorReplyUsername: '#0a0a0a',
-                        colorReply: '#6e6e6e',
-                        backgroundImage: '#ddd',
-                        colorNewMessages: '#1976d2',
-                        backgroundReaction: '#eee',
-                        borderStyleReaction: '1px solid #eee',
-                        backgroundReactionHover: '#fff',
-                        borderStyleReactionHover: '1px solid #ddd',
-                        colorReactionCounter: '#0a0a0a',
-                        backgroundReactionMe: '#cfecf5',
-                        borderStyleReactionMe: '1px solid #3b98b8',
-                        backgroundReactionHoverMe: '#cfecf5',
-                        borderStyleReactionHoverMe: '1px solid #3b98b8',
-                        colorReactionCounterMe: '#0b59b3'
-                    },
-
-                    markdown: {
-                        background: 'rgba(239, 239, 239, 0.7)',
-                        border: 'rgba(212, 212, 212, 0.9)',
-                        color: '#e01e5a',
-                        colorMulti: '#0a0a0a'
-                    },
-
-                    room: {
-                        colorUsername: '#0a0a0a',
-                        colorMessage: '#67717a',
-                        colorTimestamp: '#a2aeb8',
-                        colorStateOnline: '#4caf50',
-                        colorStateOffline: '#ccc',
-                        backgroundCounterBadge: '#0696c7',
-                        colorCounterBadge: '#fff'
-                    },
-
-                    emoji: {
-                        background: '#fff'
-                    },
-
-                    icons: {
-                        search: '#9ca6af',
-                        add: '#1976d2',
-                        toggle: '#0a0a0a',
-                        menu: '#0a0a0a',
-                        close: '#9ca6af',
-                        closeImage: '#fff',
-                        file: '#1976d2',
-                        paperclip: '#1976d2',
-                        closeOutline: '#000',
-                        send: '#1976d2',
-                        sendDisabled: '#9ca6af',
-                        emoji: '#1976d2',
-                        emojiReaction: '#828c94',
-                        document: '#1976d2',
-                        pencil: '#9e9e9e',
-                        checkmark: '#0696c7',
-                        eye: '#fff',
-                        dropdownMessage: '#fff',
-                        dropdownMessageBackground: 'rgba(0, 0, 0, 0.25)',
-                        dropdownScroll: '#0a0a0a'
-                    }
-                },
                 rooms: [
                     {
                         roomId: 1,
@@ -261,32 +143,6 @@
                             ]
                         }
                     },
-                    {
-                        _id: 7891,
-                        content: 'message 1',
-                        sender_id: 1234,
-                        username: 'John Doe',
-                        date: '13 Octomber',
-                        timestamp: '10:20',
-                        seen: true,
-                        disable_actions: false,
-                        disable_reactions: false,
-                        file: {
-                            name: 'My File',
-                            size: 67351,
-                            type: 'jpg',
-                            url: 'https://thumbs.dreamstime.com/b/mockup-iphone-screen-background-have-png-isolated-various-applications-158473491.jpg'
-                        },
-                        reactions: {
-                            wink: [
-                                1234, // USER_ID
-                                4321
-                            ],
-                            laughing: [
-                                1234
-                            ]
-                        }
-                    }
                 ];
             },
             typingMessage(){
@@ -300,7 +156,7 @@
                 }).then(resp=>console.log(resp));
 
                 this.messages.push({
-                    _id: 7888,
+                    _id: Math.random(),
                     content: args.content,
                     sender_id: 1234,
                     username: 'John Doe',
