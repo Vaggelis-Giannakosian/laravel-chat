@@ -30,4 +30,26 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
         ];
     }
+
+    public function lostre()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'name' => 'Vangelis',
+                'email' => 'e.giannakosian@gmail.com',
+                'password' => bcrypt('asdfasdf'),
+            ];
+        });
+    }
+
+    public function loli()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'name' => 'Loli',
+                'email' => 'loli@gmail.com',
+                'password' => bcrypt('asdfasdf'),
+            ];
+        });
+    }
 }
