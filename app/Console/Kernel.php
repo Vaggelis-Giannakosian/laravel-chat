@@ -26,6 +26,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
+        $schedule->command('telescope:prune --hours=48')->daily();
     }
 
     /**
