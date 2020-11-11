@@ -34,6 +34,8 @@ class MessageSent implements ShouldBroadcast
         $this->receiver = $receiver;
         $this->sender = $sender;
         $this->message = $message;
+
+        $this->dontBroadcastToCurrentUser();
     }
 
     /**

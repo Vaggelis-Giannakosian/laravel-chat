@@ -98,10 +98,7 @@ class MessagesController extends Controller
         $receiver = User::findOrFail($receiverId);
         $message = request()->input('message');
 
-        event(
-            ( new MessageSent($receiver,auth()->user(),$message))
-                ->dontBroadcastToCurrentUser()
-        );
+        event(new MessageSent($receiver,auth()->user(),$message));
 
 
 
