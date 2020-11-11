@@ -98,9 +98,11 @@ class MessagesController extends Controller
         $receiver = User::findOrFail($receiverId);
         $message = request()->input('message');
 
-        event(new MessageSent($receiver,auth()->user(),$message));
+        event(
+            ( new MessageSent($receiver,auth()->user(),$message))
+                ->dontBroadcastToCurrentUser()
+        );
 
-        exit;
 
 
         //TODO: find thread and if not exists create one
