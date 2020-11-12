@@ -8,7 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Cmgmyr\Messenger\Models\Message;
 use Cmgmyr\Messenger\Models\Participant;
-use Cmgmyr\Messenger\Models\Thread;
+use App\Models\Thread;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -41,26 +41,30 @@ class MessagesController extends Controller
      * @param $id
      * @return mixed
      */
-    public function show($id)
+    public function show(Thread $thread)
     {
-        try {
-            $thread = Thread::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            Session::flash('error_message', 'The thread with ID: ' . $id . ' was not found.');
 
-            return redirect()->route('messages');
-        }
-
-        // show current user in list if not a current participant
-        // $users = User::whereNotIn('id', $thread->participantsUserIds())->get();
-
-        // don't show the current user in list
-        $userId = Auth::id();
-        $users = User::whereNotIn('id', $thread->participantsUserIds($userId))->get();
-
-        $thread->markAsRead($userId);
-
-        return view('messenger.show', compact('thread', 'users'));
+        return response([
+            'messages' =>  $thread->messages()->with('user')->latest()->take(10)->get()->reverse()->values()
+        ],200);
+//        try {
+//            $thread = Thread::findOrFail($id);
+//        } catch (ModelNotFoundException $e) {
+//            Session::flash('error_message', 'The thread with ID: ' . $id . ' was not found.');
+//
+//            return redirect()->route('messages');
+//        }
+//
+//        // show current user in list if not a current participant
+//        // $users = User::whereNotIn('id', $thread->participantsUserIds())->get();
+//
+//        // don't show the current user in list
+//        $userId = Auth::id();
+//        $users = User::whereNotIn('id', $thread->participantsUserIds($userId))->get();
+//
+//        $thread->markAsRead($userId);
+//
+//        return view('messenger.show', compact('thread', 'users'));
     }
 
     /**
@@ -80,25 +84,21 @@ class MessagesController extends Controller
      *
      * @return mixed
      */
-    public function store()
+    public function store(Thread $thread)
     {
-        $receiverId = request()->input('userId');
-        $threadId = request()->input('threadId') ?: ( Thread::between([auth()->id(),$receiverId])->first()->id ?? null );
 
-        if(! $threadId)
-        {
-            //TODO: create Thread - add message - create participants
-        }else{
-            //TODO: add message
-        }
-
-//        var_dump($threadId);exit;
-
+//        $threadId = request()->input('threadId') ?: ( Thread::between([auth()->id(),$receiverId])->first()->id ?? null );
 //
-        $receiver = User::findOrFail($receiverId);
-        $message = request()->input('message');
+//        if(! $threadId)
+//        {
+//            //TODO: create Thread - add message - create participants
+//        }else{
+//            //TODO: add message
+//        }
+//
 
-        event(new MessageSent($receiver,auth()->user(),$message));
+        $message = $thread->addMessage( request('message'));
+        event(new MessageSent(auth()->user(),$thread,$message));
 
 
 

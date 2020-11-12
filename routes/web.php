@@ -25,6 +25,10 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 //Messages Routes
 
+Route::post('threads/{thread}',[MessagesController::class,'store'])->middleware('auth');
+Route::get('threads/{thread}',[MessagesController::class,'show'])->middleware('auth');
+
+
 Route::prefix('messages')->group(function () {
     Route::get('/', [MessagesController::class,'index']);
     Route::get('create', [MessagesController::class,'create']);

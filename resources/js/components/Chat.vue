@@ -6,7 +6,6 @@
                  :menuActions="menuActions"
                  :messageActions ="messageActions "
                  :loadingRooms="false"
-
                  @fetchMessages="getMessages"
                  @typingMessage="notifyParticipants"
                  @sendMessage="sendMessage"
@@ -21,44 +20,10 @@
         components: {
             ChatWindow
         },
-        props: ['authUser','receiverId'],
+        props: ['authUser','threads'],
         data() {
             return {
-                rooms: [
-                    {
-                        roomId: 1,
-                        roomName: 'Room 1',
-                        unreadCount: 4,
-                        lastMessage: {
-                            content: 'Last message received',
-                            sender_id: 1234,
-                            username: 'John Doe',
-                            timestamp: '10:20',
-                            date: 123242424,
-                            seen: false,
-                            new: true
-                        },
-                        users: [
-                            {
-                                _id: 1234,
-                                username: 'John Doe',
-                                status: {
-                                    state: 'online',
-                                    last_changed: 'today, 14:30'
-                                }
-                            },
-                            {
-                                _id: 4321,
-                                username: 'John Snow',
-                                status: {
-                                    state: 'online',
-                                    last_changed: '14 July, 20:00'
-                                }
-                            }
-                        ],
-                        typingUsers: [ 4321 ]
-                    },
-                ],
+                rooms: [],
                 menuActions:[
                     {
                         name: 'inviteUser',
@@ -98,31 +63,151 @@
                     }
                 ],
                 messages: this.initializeMessages(),
-                currentUserId: 1234,
+                currentUserId: this.authUser.id,
                 cachedMessages:{},
                 activePeer:false,
-                typingTimer:false
+                typingTimer:false,
+                channels:[]
             }
         },
+        created(){
+            this.createRoomsFromThreads()
+        },
+        mounted(){
+            this.threads.forEach(thread=> {
+                Echo.join(`thread.${thread.id}`)
+                    .listen('.NewMessage', this.onNewMessage)
+                    .listenForWhisper('typing', this.onUserWhisper)
+                    .here((users) => {
+                        console.log('here:',users)
+                    })
+                    .joining((user) => {
+                        console.log('joined:',user);
+                    })
+                    .leaving((user) => {
+                        console.log('leaving:',user);
+                    });
+            });
+        },
         methods:{
-            getMessages(args){
+            findRoomByRoomId(roomId){
+                return this.rooms.filter(room=>{
+                    return room.roomId === roomId
+                })[0]
+            },
+            onUserWhisper(e){
+                console.log(e)
+                const room = this.findRoomByRoomId(e.thread)
+                room.typingUsers.push(e.user)
+
+                if(this.typingTimer) clearTimeout(this.typingTimer)
+
+                this.typingTimer = setTimeout(()=>{
+                    room.typingUsers.splice( room.typingUsers.indexOf(e.user))
+                },2000)
+
+            },
+            onNewMessage(data){
+                console.log(data)
+
+                if( ! Array.isArray(this.cachedMessages[data.message.thread_id]))
+                {
+                    this.cachedMessages[data.message.thread_id] = []
+                }
+
+                this.cachedMessages[data.message.thread_id].push({
+                    _id: data.message.id,
+                    content: data.message.body,
+                    sender_id: data.sender.id,
+                    username: data.sender.name,
+                    date: new Date().toISOString().slice(0, 10),
+                    timestamp: new Date().toLocaleTimeString(),
+                    seen: false,
+                    disable_actions: false,
+                    disable_reactions: false,
+                })
+            },
+            createRoomsFromThreads(){
+
+                this.threads.forEach(thread=>{
+                    this.rooms.push({
+                        roomId: thread.id,
+                        roomName: thread.subject,
+                        unreadCount: 4,
+                        // lastMessage: {
+                        //     content: 'Last message received',
+                        //     sender_id: 1234,
+                        //     username: 'John Doe',
+                        //     timestamp: '10:20',
+                        //     date: 123242424,
+                        //     seen: false,
+                        //     new: true
+                        // },
+                        users: [
+                            {
+                                _id: 1,
+                                username: 'Vangelis',
+                                status: {
+                                    state: 'online',
+                                    last_changed: '14 July, 20:00'
+                                }
+                            },
+                            {
+                                _id: 2,
+                                username: 'Loli',
+                                status: {
+                                    state: 'online',
+                                    last_changed: '14 July, 20:00'
+                                }
+                            }
+                        ],
+                        typingUsers: []
+                    })
+                })
+            },
+            async getMessages(args){
 
                 const roomId = args.room.roomId
 
-                if(this.cachedMessages.hasOwnProperty(roomId))
+                if(this.cachedMessages.hasOwnProperty(roomId) && this.cachedMessages[roomId].length > 1  )
                 {
                     this.messages = this.cachedMessages[roomId];
+                    return
                 }
 
-                this.cachedMessages[roomId] =  this.initializeMessages()
+                this.cachedMessages[roomId] = await this.getLatestMessagesForThread(roomId)
                 this.messages = this.cachedMessages[roomId]
+            },
+            getLatestMessagesForThread(roomId){
+                return axios.get('threads/'+roomId).then(response=>{
+
+                    const messages = [];
+                    response.data.messages.forEach(message=>{
+                        messages.push({
+                            _id: message.id,
+                            content: message.body,
+                            sender_id: message.user.id,
+                            username: message.user.name,
+                            date: new Date().toISOString().slice(0, 10),
+                            timestamp: new Date().toLocaleTimeString(),
+                            seen: false,
+                            disable_actions: false,
+                            disable_reactions: false,
+                        })
+                    })
+
+                    return messages;
+
+                }).catch(error=>{
+                    return [];
+                })
             },
             initializeMessages(){
                 return [
                     {
                         _id: 7890,
                         content: 'message 1',
-                        sender_id: 4566,
+                        sender_id: 4444,
                         username: 'John Doe',
                         date: '13 Octomber',
                         timestamp: '10:20',
@@ -147,22 +232,20 @@
                     },
                 ];
             },
-            notifyParticipants(){
-                console.log('typing')
-                let channel = Echo.private('message.user')
+            notifyParticipants(args){
 
+                let channel = Echo.join('thread.' + args.roomId)
                 setTimeout( () => {
                     channel.whisper('typing', {
-                        user: 'foobar',
-                        typing: true
+                        thread:args.roomId,
+                        user: this.authUser.id,
+                        name: this.authUser.name,
                     })
                 }, 300)
 
             },
             sendMessage(args){
-
-                axios.post('/messages',{
-                    'userId':this.receiverId,
+                axios.post('/threads/' + args.roomId,{
                     'message': args.content
                 }).then(resp=>console.log(resp));
 
@@ -179,36 +262,7 @@
                 })
             }
         },
-        mounted(){
 
-            let channel = Echo.private('message.user')
-            channel.listen('.NewMessage',(data)=>{
-                console.log(data)
-                this.messages.push({
-                    _id: Math.random(),
-                    content: data.message,
-                    sender_id: 4321,
-                    username: 'John Doe',
-                    date: '13 Octomber',
-                    timestamp: '10:20',
-                    seen: false,
-                    disable_actions: false,
-                    disable_reactions: false,
-                })
-            }).listenForWhisper('typing', (e) => {
-                console.log(e)
-
-                // this.activePeer = e;
-                //
-                // if(this.typingTimer) clearTimeout(this.typingTimer)
-                //
-                // this.typingTimer = setTimeout(()=>{
-                //     this.activePeer = false;
-                // })
-
-            })
-
-        }
     }
 </script>
 

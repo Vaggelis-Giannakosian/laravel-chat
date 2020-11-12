@@ -2,8 +2,9 @@
 
 namespace App\Events;
 
+use App\Models\Message;
+use App\Models\Thread;
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -16,23 +17,14 @@ class MessageSent implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $message;
-    public $receiver;
-    /**
-     * @var User
-     */
-    private User $sender;
+    public $thread;
+    public $sender;
 
-    /**
-     * Create a new event instance.
-     *
-     * @param User $receiver
-     * @param User $sender
-     * @param $message
-     */
-    public function __construct(User $receiver, User $sender, $message)
+
+    public function __construct(User $sender, Thread $thread, Message $message)
     {
-        $this->receiver = $receiver;
-        $this->sender = $sender;
+        $this->sender = $sender->only(['name','email','id']);
+        $this->thread = $thread;
         $this->message = $message;
 
         $this->dontBroadcastToCurrentUser();
@@ -45,7 +37,7 @@ class MessageSent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('message.user');
+        return new PresenceChannel("thread.{$this->thread->id}");
     }
 
     public function broadcastAs()
