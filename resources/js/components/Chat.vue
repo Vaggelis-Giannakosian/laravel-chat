@@ -8,7 +8,7 @@
                  :loadingRooms="false"
 
                  @fetchMessages="getMessages"
-                 @typingMessage="typingMessage"
+                 @typingMessage="notifyParticipants"
                  @sendMessage="sendMessage"
     />
 </template>
@@ -99,7 +99,9 @@
                 ],
                 messages: this.initializeMessages(),
                 currentUserId: 1234,
-                cachedMessages:{}
+                cachedMessages:{},
+                activePeer:false,
+                typingTimer:false
             }
         },
         methods:{
@@ -145,8 +147,17 @@
                     },
                 ];
             },
-            typingMessage(){
+            notifyParticipants(){
                 console.log('typing')
+                let channel = Echo.private('message.user')
+
+                setTimeout( () => {
+                    channel.whisper('typing', {
+                        user: 'foobar',
+                        typing: true
+                    })
+                }, 300)
+
             },
             sendMessage(args){
 
@@ -170,7 +181,7 @@
         },
         mounted(){
 
-            let channel = Echo.private('message.user.' + this.authUser.id)
+            let channel = Echo.private('message.user')
             channel.listen('.NewMessage',(data)=>{
                 console.log(data)
                 this.messages.push({
@@ -184,6 +195,17 @@
                     disable_actions: false,
                     disable_reactions: false,
                 })
+            }).listenForWhisper('typing', (e) => {
+                console.log(e)
+
+                // this.activePeer = e;
+                //
+                // if(this.typingTimer) clearTimeout(this.typingTimer)
+                //
+                // this.typingTimer = setTimeout(()=>{
+                //     this.activePeer = false;
+                // })
+
             })
 
         }
