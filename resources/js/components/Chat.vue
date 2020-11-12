@@ -234,6 +234,8 @@
             },
             notifyParticipants(args){
 
+                if( ! args.message ) return;
+
                 let channel = Echo.join('thread.' + args.roomId)
                 setTimeout( () => {
                     channel.whisper('typing', {
