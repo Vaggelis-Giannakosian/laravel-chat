@@ -104,7 +104,7 @@
 
                 this.typingTimer = setTimeout(()=>{
                     room.typingUsers.splice( room.typingUsers.indexOf(e.user))
-                },2000)
+                },1000)
 
             },
             onNewMessage(data){
@@ -249,19 +249,20 @@
             sendMessage(args){
                 axios.post('/threads/' + args.roomId,{
                     'message': args.content
-                }).then(resp=>console.log(resp));
-
-                this.messages.push({
-                    _id: Math.random(),
-                    content: args.content,
-                    sender_id: 1234,
-                    username: 'John Doe',
-                    date: '13 Octomber',
-                    timestamp: '10:20',
-                    seen: false,
-                    disable_actions: false,
-                    disable_reactions: false,
-                })
+                }).then(resp=>{
+                    console.log(resp);
+                    this.messages.push({
+                        _id: Math.random(),
+                        content: args.content,
+                        sender_id: this.authUser.id,
+                        username: this.authUser.name,
+                        date: new Date().toISOString().slice(0, 10),
+                        timestamp: new Date().toLocaleTimeString(),
+                        seen: false,
+                        disable_actions: false,
+                        disable_reactions: false,
+                    })
+                });
             }
         },
 
