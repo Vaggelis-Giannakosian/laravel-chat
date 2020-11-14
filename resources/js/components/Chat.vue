@@ -135,11 +135,27 @@
                     disable_reactions: false,
                 })
 
+                this.setRoomsLastMessage(data);
+
                 if( activeRoomId !== data.message.thread_id)
                 {
                     this.setRoomsUnreadCount(data.message.thread_id, 1)
                 }
 
+
+            },
+            setRoomsLastMessage(data){
+
+                const createdDate = new Date(data.message.created_at);
+                const room = this.rooms.find(room=>room.roomId === data.message.thread_id)
+                room.lastMessage = {
+                        content: data.message.body,
+                        sender_id: data.sender.id,
+                        timestamp: createdDate.getDate() + '/' + createdDate.getMonth() + '/' + createdDate.getFullYear(),
+                        date: createdDate.getTime(),
+                        seen: false,
+                        new: true
+                }
 
             },
             createRoomsFromThreads() {
