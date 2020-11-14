@@ -84,6 +84,7 @@ class MessagesController extends Controller
         $message = $thread->addMessage( request('message'));
         event(new MessageSent(auth()->user(),$thread,$message));
 
+        return response(['message'=>$message,'sender'=>auth()->user()],201);
 
 
         //TODO: find thread and if not exists create one

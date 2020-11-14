@@ -268,6 +268,8 @@
                         disable_actions: false,
                         disable_reactions: false,
                     })
+
+                    this.setRoomsLastMessage(resp.data)
                 });
             }
         },
