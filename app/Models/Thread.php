@@ -10,6 +10,7 @@ class Thread extends BaseThread
 {
     use HasFactory;
 
+    protected $appends = ['unreadMessages'];
 
     public function addMessage($body, $sender = null)
     {
@@ -21,5 +22,21 @@ class Thread extends BaseThread
         ]));
     }
 
+    public function getunreadMessagesAttribute(){
+        return $this->userUnreadMessagesCount(auth()->id());
+    }
+
+    public function lastMessage(){
+        return $this->hasOne(Message::class)->latest();
+    }
+
+    public function updateLastRead($userId = null)
+    {
+        $userId = $userId ?: auth()->id();
+
+        $participant = $this->participants->where('user_id',$userId)->first();
+        $participant->last_read = now();
+        $participant->save();
+    }
 
 }

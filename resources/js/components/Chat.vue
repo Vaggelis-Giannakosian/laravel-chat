@@ -1,14 +1,16 @@
 <template>
-    <chat-window :currentUserId="currentUserId"
-                 :rooms="rooms"
-                 :messages="messages"
-                 :messagesLoaded="true"
-                 :menuActions="menuActions"
-                 :messageActions ="messageActions "
-                 :loadingRooms="false"
-                 @fetchMessages="getMessages"
-                 @typingMessage="notifyParticipants"
-                 @sendMessage="sendMessage"
+    <chat-window
+        ref="chat"
+        :currentUserId="currentUserId"
+        :rooms="rooms"
+        :messages="messages"
+        :messagesLoaded="true"
+        :menuActions="menuActions"
+        :messageActions="messageActions "
+        :loadingRooms="false"
+        @fetchMessages="getMessages"
+        @typingMessage="notifyParticipants"
+        @sendMessage="sendMessage"
     />
 </template>
 
@@ -20,11 +22,11 @@
         components: {
             ChatWindow
         },
-        props: ['authUser','threads'],
+        props: ['authUser', 'threads'],
         data() {
             return {
                 rooms: [],
-                menuActions:[
+                menuActions: [
                     {
                         name: 'inviteUser',
                         title: 'Invite User'
@@ -38,7 +40,7 @@
                         title: 'Delete Room'
                     }
                 ],
-                messageActions:[
+                messageActions: [
                     {
                         name: 'addMessageToFavorite',
                         title: 'Add To Favorite'
@@ -62,56 +64,62 @@
                         onlyMe: true
                     }
                 ],
-                messages: this.initializeMessages(),
+                messages: [],
                 currentUserId: this.authUser.id,
-                cachedMessages:{},
-                activePeer:false,
-                typingTimer:false,
-                channels:[]
+                cachedMessages: {},
+                activePeer: false,
+                typingTimer: false,
+                channels: []
             }
         },
-        created(){
+        created() {
             this.createRoomsFromThreads()
         },
-        mounted(){
-            this.threads.forEach(thread=> {
+        mounted() {
+            this.threads.forEach(thread => {
                 Echo.join(`thread.${thread.id}`)
                     .listen('.NewMessage', this.onNewMessage)
                     .listenForWhisper('typing', this.onUserWhisper)
                     .here((users) => {
-                        console.log('here:',users)
+                        users.forEach(user => {
+                            this.setUserStatus(thread.id, user, true)
+                        })
                     })
                     .joining((user) => {
-                        console.log('joined:',user);
+                        this.setUserStatus(thread.id, user, true)
                     })
                     .leaving((user) => {
-                        console.log('leaving:',user);
+                        this.setUserStatus(thread.id, user, false)
                     });
             });
         },
-        methods:{
-            findRoomByRoomId(roomId){
-                return this.rooms.filter(room=>{
+        methods: {
+            setUserStatus(roomId, currentUser, isHere) {
+                const room = this.rooms.find(room => room.roomId === roomId)
+                const user = room.users.find(user => user._id === currentUser.id)
+                user.status.state = isHere ? 'online' : 'offline'
+            },
+            findRoomByRoomId(roomId) {
+                return this.rooms.filter(room => {
                     return room.roomId === roomId
                 })[0]
             },
-            onUserWhisper(e){
-                console.log(e)
+            onUserWhisper(e) {
                 const room = this.findRoomByRoomId(e.thread)
                 room.typingUsers.push(e.user)
 
-                if(this.typingTimer) clearTimeout(this.typingTimer)
+                if (this.typingTimer) clearTimeout(this.typingTimer)
 
-                this.typingTimer = setTimeout(()=>{
-                    room.typingUsers.splice( room.typingUsers.indexOf(e.user))
-                },1000)
+                this.typingTimer = setTimeout(() => {
+                    room.typingUsers.splice(room.typingUsers.indexOf(e.user))
+                }, 1000)
 
             },
-            onNewMessage(data){
-                console.log(data)
+            onNewMessage(data) {
 
-                if( ! Array.isArray(this.cachedMessages[data.message.thread_id]))
-                {
+                const activeRoomId = this.$refs.chat.$children[0].$data.selectedRoomId
+
+                if (!Array.isArray(this.cachedMessages[data.message.thread_id])) {
                     this.cachedMessages[data.message.thread_id] = []
                 }
 
@@ -126,63 +134,75 @@
                     disable_actions: false,
                     disable_reactions: false,
                 })
-            },
-            createRoomsFromThreads(){
 
-                this.threads.forEach(thread=>{
+                if( activeRoomId !== data.message.thread_id)
+                {
+                    this.setRoomsUnreadCount(data.message.thread_id, 1)
+                }
+
+
+            },
+            createRoomsFromThreads() {
+
+                this.threads.forEach(thread => {
+
+                    const users = thread.participants.map(participant => {
+                        return {
+                            _id: participant.user_id,
+                            username: participant.user.name,
+                            status: {
+                                state: participant.user_id === this.authUser.id ? 'online' : 'offline',
+                                last_changed: participant.last_read
+                            }
+                        };
+                    });
+
+                    const createdDate = new Date(thread.last_message.created_at);
                     this.rooms.push({
                         roomId: thread.id,
                         roomName: thread.subject,
-                        unreadCount: 4,
-                        // lastMessage: {
-                        //     content: 'Last message received',
-                        //     sender_id: 1234,
-                        //     username: 'John Doe',
-                        //     timestamp: '10:20',
-                        //     date: 123242424,
-                        //     seen: false,
-                        //     new: true
-                        // },
-                        users: [
-                            {
-                                _id: 1,
-                                username: 'Vangelis',
-                                status: {
-                                    state: 'online',
-                                    last_changed: '14 July, 20:00'
-                                }
-                            },
-                            {
-                                _id: 2,
-                                username: 'Loli',
-                                status: {
-                                    state: 'online',
-                                    last_changed: '14 July, 20:00'
-                                }
-                            }
-                        ],
+                        unreadCount: thread.unreadMessages,
+                        lastMessage: {
+                            content: thread.last_message.body,
+                            sender_id: thread.last_message.user_id,
+                            timestamp: createdDate.getDate() + '/' + createdDate.getMonth() + '/' + createdDate.getFullYear(),
+                            date: createdDate.getTime(),
+                            seen: false,
+                            new: true
+                        },
+                        users: users,
                         typingUsers: []
                     })
                 })
             },
-            async getMessages(args){
+            async getMessages(args) {
 
                 const roomId = args.room.roomId
 
-                if(this.cachedMessages.hasOwnProperty(roomId) && this.cachedMessages[roomId].length > 1  )
-                {
+                if (this.cachedMessages.hasOwnProperty(roomId) && this.cachedMessages[roomId].length > 1) {
                     this.messages = this.cachedMessages[roomId];
+                    this.setRoomsUnreadCount(roomId)
                     return
                 }
 
                 this.cachedMessages[roomId] = await this.getLatestMessagesForThread(roomId)
+                this.setRoomsUnreadCount(roomId)
                 this.messages = this.cachedMessages[roomId]
             },
-            getLatestMessagesForThread(roomId){
-                return axios.get('threads/'+roomId).then(response=>{
+            setRoomsUnreadCount(roomId, count = null) {
+
+                if (count) {
+                    this.rooms.find(room => room.roomId === roomId).unreadCount++
+                } else {
+                    this.rooms.find(room => room.roomId === roomId).unreadCount = null
+                }
+
+            },
+            getLatestMessagesForThread(roomId) {
+                return axios.get('threads/' + roomId).then(response => {
 
                     const messages = [];
-                    response.data.messages.forEach(message=>{
+                    response.data.messages.forEach(message => {
                         messages.push({
                             _id: message.id,
                             content: message.body,
@@ -198,59 +218,29 @@
 
                     return messages;
 
-                }).catch(error=>{
+                }).catch(error => {
                     return [];
                 })
             },
-            initializeMessages(){
-                return [
-                    {
-                        _id: 7890,
-                        content: 'message 1',
-                        sender_id: 4444,
-                        username: 'John Doe',
-                        date: '13 Octomber',
-                        timestamp: '10:20',
-                        seen: true,
-                        disable_actions: false,
-                        disable_reactions: false,
-                        file: {
-                            name: 'My File',
-                            size: 67351,
-                            type: 'jpg',
-                            url: 'https://thumbs.dreamstime.com/b/mockup-iphone-screen-background-have-png-isolated-various-applications-158473491.jpg'
-                        },
-                        reactions: {
-                            wink: [
-                                1234, // USER_ID
-                                4321
-                            ],
-                            laughing: [
-                                1234
-                            ]
-                        }
-                    },
-                ];
-            },
-            notifyParticipants(args){
+            notifyParticipants(args) {
 
-                if( ! args.message ) return;
+                if (!args.message) return;
 
                 let channel = Echo.join('thread.' + args.roomId)
-                setTimeout( () => {
+                setTimeout(() => {
                     channel.whisper('typing', {
-                        thread:args.roomId,
+                        thread: args.roomId,
                         user: this.authUser.id,
                         name: this.authUser.name,
                     })
                 }, 300)
 
             },
-            sendMessage(args){
-                axios.post('/threads/' + args.roomId,{
+            sendMessage(args) {
+                axios.post('/threads/' + args.roomId, {
                     'message': args.content
-                }).then(resp=>{
-                    console.log(resp);
+                }).then(resp => {
+
                     this.messages.push({
                         _id: Math.random(),
                         content: args.content,

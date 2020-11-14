@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\MessageSent;
-use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -24,13 +22,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $message = [
-            'sender' => 'john',
-            'text' => 'This is a new message',
-        ];
 
-//        event(new MessagePushed($message));
-
-        return view('home');
+        $threads = auth()->user()->threads()->with(['participants','participants.user','lastMessage'])->get();
+        return view('home',compact('threads'));
     }
 }

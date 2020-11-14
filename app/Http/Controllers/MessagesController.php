@@ -43,28 +43,12 @@ class MessagesController extends Controller
      */
     public function show(Thread $thread)
     {
+        $messages = $thread->messages()->with('user')->latest()->take(10)->get()->reverse()->values();
+        $thread->updateLastRead();
 
         return response([
-            'messages' =>  $thread->messages()->with('user')->latest()->take(10)->get()->reverse()->values()
+            'messages' =>  $messages
         ],200);
-//        try {
-//            $thread = Thread::findOrFail($id);
-//        } catch (ModelNotFoundException $e) {
-//            Session::flash('error_message', 'The thread with ID: ' . $id . ' was not found.');
-//
-//            return redirect()->route('messages');
-//        }
-//
-//        // show current user in list if not a current participant
-//        // $users = User::whereNotIn('id', $thread->participantsUserIds())->get();
-//
-//        // don't show the current user in list
-//        $userId = Auth::id();
-//        $users = User::whereNotIn('id', $thread->participantsUserIds($userId))->get();
-//
-//        $thread->markAsRead($userId);
-//
-//        return view('messenger.show', compact('thread', 'users'));
     }
 
     /**
