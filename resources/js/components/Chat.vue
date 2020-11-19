@@ -11,6 +11,7 @@
         @fetchMessages="getMessages"
         @typingMessage="notifyParticipants"
         @sendMessage="sendMessage"
+        @addRoom="createNewRoom"
     />
 </template>
 
@@ -193,6 +194,7 @@
             },
             async getMessages(args) {
 
+
                 const roomId = args.room.roomId
 
                 if (this.cachedMessages.hasOwnProperty(roomId) && this.cachedMessages[roomId].length > 1) {
@@ -271,7 +273,10 @@
 
                     this.setRoomsLastMessage(resp.data)
                 });
-            }
+            },
+            createNewRoom(){
+                alert('Not ready yet');
+            },
         },
 
     }

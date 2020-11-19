@@ -43,7 +43,7 @@ class MessagesController extends Controller
      */
     public function show(Thread $thread)
     {
-        $messages = $thread->messages()->with('user')->latest()->take(10)->get()->reverse()->values();
+        $messages = $thread->messages()->with('user')->latest()->take(30)->get()->reverse()->values();
         $thread->updateLastRead();
 
         return response([

@@ -19,8 +19,15 @@ window.Vue = require('vue');
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
+
+import Chat from 'vue-beautiful-chat'
+Vue.use(Chat)
+
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
+Vue.component('pavla-beautiful-chat', require('./components/BeautifulChat.vue').default);
+Vue.component('pavla-quick-chat', require('./components/QuickChat.vue').default);
 Vue.component('chat', require('./components/Chat.vue').default);
+
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
