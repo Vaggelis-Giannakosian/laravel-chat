@@ -58,7 +58,11 @@
                                 </button>
 
                                 <a type="submit" href="/login/github" class="btn btn-secondary">
-                                    {{ __('Login with Github') }}
+                                    {{ __('Github') }}
+                                </a>
+
+                                <a type="submit" href="/login/twitch" class="btn btn-secondary">
+                                    {{ __('Twitch') }}
                                 </a>
 
                                 @if (Route::has('password.request'))

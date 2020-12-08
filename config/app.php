@@ -178,6 +178,7 @@ return [
         App\Providers\TelescopeServiceProvider::class,
 
 
+        \SocialiteProviders\Manager\ServiceProvider::class,
 
     ],
 
