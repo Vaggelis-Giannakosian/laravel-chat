@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\Auth\GithubLoginController;
 use App\Http\Controllers\MessagesController;
 use Illuminate\Support\Facades\Route;
 /*
@@ -19,6 +20,9 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+
+Route::get('login/github', [GithubLoginController::class, 'redirectToProvider']);
+Route::get('login/github/callback', [GithubLoginController::class, 'handleProviderCallback']);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
